@@ -61,7 +61,7 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ message: 'Invalid password' });
     }
 
-    // --- JWT Payload ---
+    // JWT Payload
     const payload = {
       id: user._id,
       username: user.username,
@@ -69,7 +69,7 @@ router.post('/login', async (req, res) => {
       role: user.role
     };
 
-    // --- JWT Token Generation ---
+    // JWT Token Generation
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
 
     res.status(200).json({
