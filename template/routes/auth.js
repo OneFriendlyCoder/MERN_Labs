@@ -27,10 +27,10 @@ router.post('/signup', async (req, res) => {
     }
 
     // Password hashing
-    const password_hash = await bcrypt.hash(password, 10);
+    const password = await bcrypt.hash(password, 10);
 
     // Create and save user
-    const newUser = new User({ username, email, password_hash, role });
+    const newUser = new User({ username, email, password, role });
     await newUser.save();
     return res.status(201).json({ message: 'User registered successfully!' });
   } catch (err) {
@@ -56,7 +56,7 @@ router.post('/login', async (req, res) => {
       return res.status(404).json({ message: 'User not found, please sign up first' });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password_hash);
+    const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ message: 'Invalid password' });
     }
