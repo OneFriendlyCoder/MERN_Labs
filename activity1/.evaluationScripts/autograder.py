@@ -208,13 +208,12 @@ def main():
             "message": "Test case 6 failed"
         }
 
-    # Write test results to evaluate.json file
-    try:
-        with open(EVALUATE_FILE, 'w') as eval_file:
-            json.dump(dataSkel_list, eval_file, indent=4)
-        print(f"Test results successfully written to {EVALUATE_FILE}")
-    except Exception as e:
-        print("An error occurred while writing to evaluate.json:", e)
+# Write test results to evaluate.json file
+try:
+    with open(EVALUATE_FILE, 'w') as eval_file:
+        json.dump({"data": dataSkel_list}, eval_file, indent=4)
+except Exception as e:
+    print("An error occurred while writing to evaluate.json:", e)
 
 if __name__ == "__main__":
     main()

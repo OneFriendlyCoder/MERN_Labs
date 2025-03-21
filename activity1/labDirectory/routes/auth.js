@@ -56,7 +56,7 @@ router.post('/signup', async (req, res) => {
   // ---------------YOUR CODE ENDS HERE---------------
 
   // ---------------REMOVE THE DEMO RESPONSE BELOW---------------
-  // return res.status(201).json({ message: 'This is a demo response' });
+  return res.status(201).json({ message: 'This is a demo response' });
   
 } catch (err) {
     console.error(err);
