@@ -8,22 +8,22 @@ const jwt = require('jsonwebtoken');
 router.post('/signup', async (req, res) => {
 
   //Extract Data
-  const { username, email, password, role } = req.body;
+  const { username, email, password } = req.body;
 
   // Validate input
-  if (!username || !email || !password || !role) {
-    return res.status(400).json({ message: 'All fields are required.' });
+  if (!username || !email || !password) {
+    return res.status(400).json({ message: 'All fields are required' });
   }
 
-  if (!['admin', 'user'].includes(role)) {
-    return res.status(400).json({ message: 'Role must be either admin or user.' });
-  }
+  // if (!['admin', 'user'].includes(role)) {
+  //   return res.status(400).json({ message: 'Role must be either admin or user.' });
+  // }
 
   try {
     // Duplicate checks
     const existingUser = await User.findOne({ $or: [{ email }, { username }] });
     if (existingUser) {
-      return res.status(409).json({ message: 'Username or email already registered.' });
+      return res.status(409).json({ message: 'Username or email already registered' });
     }
 
     // Password hashing
