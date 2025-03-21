@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Flying Bird Game</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      font-family: 'Segoe UI', sans-serif;
+      height: 100vh;
+    }
+    canvas {
+      display: block;
+      background: transparent;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+    }
+    #resetButton {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      padding: 10px 20px;
+      font-size: 18px;
+      background-color: #4a90e2;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+      transition: 0.3s ease;
+      z-index: 2;
+    }
+    #resetButton:hover {
+      background-color: #357ABD;
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="gameCanvas"></canvas>
+  <button id="resetButton">Reset Game</button>
+
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const resetButton = document.getElementById('resetButton');
+
+    // Resize canvas full screen
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    let bird, pipes, pipeGap, pipeWidth, frame, score, gameOver;
+
+    function initGame() {
+      bird = { 
+        x: canvas.width / 5, 
+        y: canvas.height / 2, 
+        width: 40, 
+        height: 40, 
+        gravity: 0, 
+        lift: -12 
+      };
+      pipes = [];
+      pipeGap = canvas.height / 4;
+      pipeWidth = 60;
+      frame = 0;
+      score = 0;
+      gameOver = false;
+    }
+
+    initGame();
+
+    document.addEventListener('keydown', () => { bird.gravity = bird.lift; });
+
+    function drawBird() {
+      ctx.fillStyle = 'yellow';
+      ctx.fillRect(bird.x, bird.y, bird.width, bird.height);
+    }
+
+    function drawPipes() {
+      ctx.fillStyle = 'green';
+      pipes.forEach(pipe => {
+        ctx.fillRect(pipe.x, 0, pipeWidth, pipe.top);
+        ctx.fillRect(pipe.x, pipe.top + pipeGap, pipeWidth, canvas.height - pipe.top - pipeGap);
+      });
+    }
+
+    function updatePipes() {
+      if (frame % 100 === 0) {
+        let top = Math.random() * (canvas.height / 2);
+        pipes.push({ x: canvas.width, top: top });
+      }
+      pipes.forEach(pipe => { pipe.x -= 3; });
+
+      pipes = pipes.filter(pipe => pipe.x + pipeWidth > 0);
+    }
+
+    function detectCollision() {
+      for (let pipe of pipes) {
+        if (
+          bird.x < pipe.x + pipeWidth &&
+          bird.x + bird.width > pipe.x &&
+          (bird.y < pipe.top || bird.y + bird.height > pipe.top + pipeGap)
+        ) {
+          gameOver = true;
+        }
+      }
+      if (bird.y + bird.height >= canvas.height || bird.y < 0) {
+        gameOver = true;
+      }
+    }
+
+    function drawScore() {
+      ctx.fillStyle = '#000';
+      ctx.font = '28px Arial';
+      ctx.fillText(`Score: ${score}`, 20, 40);
+    }
+
+    function gameLoop() {
+      if (gameOver) {
+        ctx.fillStyle = '#000';
+        ctx.font = '60px Arial';
+        ctx.fillText('Game Over!', canvas.width / 2 - 150, canvas.height / 2 - 30);
+        ctx.font = '30px Arial';
+        ctx.fillText(`Score: ${score}`, canvas.width / 2 - 40, canvas.height / 2 + 20);
+        return;
+      }
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      drawBird();
+      drawPipes();
+      drawScore();
+
+      bird.gravity += 0.5;
+      bird.y += bird.gravity;
+
+      updatePipes();
+
+      pipes.forEach(pipe => {
+        if (pipe.x + pipeWidth === Math.floor(bird.x)) score++;
+      });
+
+      detectCollision();
+
+      frame++;
+      requestAnimationFrame(gameLoop);
+    }
+
+    resetButton.addEventListener('click', () => {
+      initGame();
+      gameLoop();
+    });
+
+    gameLoop();
+  </script>
+</body>
+</html>
