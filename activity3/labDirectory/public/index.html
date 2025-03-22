@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User Login</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      background-color: rgba(255, 255, 255, 0.95);
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 25px;
+      font-size: 2em;
+      color: #333;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    input[type="email"],
+    input[type="password"] {
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      outline: none;
+      font-size: 1em;
+      transition: 0.3s ease;
+    }
+
+    input[type="email"]:focus,
+    input[type="password"]:focus {
+      border-color: #a1c4fd;
+      box-shadow: 0 0 8px rgba(161, 196, 253, 0.5);
+    }
+
+    button {
+      padding: 12px;
+      background-color: #4a90e2;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 1em;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #357ABD;
+    }
+
+    /* Toast Styling */
+    .toast {
+      visibility: hidden;
+      min-width: 250px;
+      margin-top: 20px;
+      background-color: #4BB543;
+      color: white;
+      text-align: center;
+      border-radius: 8px;
+      padding: 16px;
+      position: fixed;
+      z-index: 1;
+      left: 50%;
+      bottom: 30px;
+      transform: translateX(-50%);
+      font-size: 1em;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      transition: visibility 0s, opacity 0.5s linear;
+      opacity: 0;
+    }
+
+    .toast.show {
+      visibility: visible;
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Login</h1>
+    <form id="loginForm">
+      <input type="email" id="email" placeholder="Email Address" required>
+      <input type="password" id="password" placeholder="Password" required>
+      <button type="submit">Login</button>
+    </form>
+  </div>
+
+  <!-- Toast Message -->
+  <div id="toast" class="toast"></div>
+
+  <script>
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const hostname = window.location.hostname;
+
+      const data = { email, password };
+
+      fetch(`http://${hostname}:30002/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      })
+      .then(response => {
+        if (!response.ok) throw new Error('Invalid credentials or network error');
+        return response.json();
+      })
+      .then(result => {
+        console.log('Login Success:', result);
+        if (result.message === "Login successful!") {
+          const username = result.user.username;
+          showToast(`Welcome ${username}`);
+          setTimeout(() => {
+            window.location.href = "flappy.html";
+          }, 10);
+        } else {
+          alert('Unexpected response');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Login failed. Please check your credentials.');
+      });
+    });
+  </script>
+
+</body>
+</html>
