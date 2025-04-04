@@ -2,13 +2,17 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
 const User = require('../models/User');
+const jwt = require('jsonwebtoken');
+
+const JWT_SECRET="ThisIsASecretKey"
+const JWT_EXPIRES_IN="1h"
 
 // Create a /login route that uses the POST http method to login a user
 router.post('/login', async (req, res) => {
   try {
 
   // SECTION 1
-  // EXTRACT DATA : Write code to extract data(username, email, password, role) from the request body. 
+  // EXTRACT DATA : Write code to extract data(username, email, password) from the request body. 
   // ---------------YOUR CODE GOES HERE---------------
   
   // ---------------YOUR CODE ENDS HERE---------------
@@ -45,15 +49,6 @@ router.post('/login', async (req, res) => {
   // SECTION 5
   // MATCH PASSWORD : Check for a valid password 
   // If the entered password is incorrect, return a 401 status with an error message "Invalid password"
-  // ---------------YOUR CODE GOES HERE---------------
-  
-  // ---------------YOUR CODE ENDS HERE---------------
-
-  // **************************************************
-
-  // SECTION 6
-  // ALL CHECKS PASSED 
-  // Return a success 200 status with a message "Login successful"
   // ---------------YOUR CODE GOES HERE---------------
   
   // ---------------YOUR CODE ENDS HERE---------------

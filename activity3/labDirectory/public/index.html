@@ -116,7 +116,7 @@
       toast.classList.add('show');
       setTimeout(() => {
         toast.classList.remove('show');
-      }, 3000);
+      }, 1000);
     }
 
     document.getElementById('loginForm').addEventListener('submit', function(event) {
@@ -144,7 +144,7 @@
           showToast(`Welcome ${username}`);
           setTimeout(() => {
             window.location.href = "flappy.html";
-          }, 10);
+          }, 1000);
         } else {
           alert('Unexpected response');
         }

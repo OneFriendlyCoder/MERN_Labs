@@ -91,10 +91,9 @@
       const username = document.getElementById('username').value;
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
-      const role = "user";
       const hostname = window.location.hostname;
 
-      const data = { username, email, password, role };
+      const data = { username, email, password};
 
       fetch(`http://${hostname}:30002/signup`, {
         method: 'POST',

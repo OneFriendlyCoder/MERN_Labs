@@ -8,7 +8,7 @@ router.post('/login', async (req, res) => {
   try {
 
   // SECTION 1
-  // EXTRACT DATA : Write code to extract data(username, email, password, role) from the request body. 
+  // EXTRACT DATA : Write code to extract data(username, email, password) from the request body. 
   // ---------------YOUR CODE GOES HERE---------------
   
   // ---------------YOUR CODE ENDS HERE---------------
