@@ -139,14 +139,15 @@
       })
       .then(result => {
         console.log('Login Success:', result);
-        if (result.message === "Login successful!") {
+        // Check if result has token, message and user details
+        if (result.token && result.message && result.user) {
           const username = result.user.username;
           showToast(`Welcome ${username}`);
           setTimeout(() => {
             window.location.href = "flappy.html";
           }, 1000);
         } else {
-          alert('Unexpected response');
+          alert('Unexpected response structure');
         }
       })
       .catch(error => {
