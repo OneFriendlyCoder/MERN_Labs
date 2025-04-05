@@ -2,24 +2,23 @@ import requests
 from pymongo import MongoClient
 import time
 import bcrypt
-import random
-import string
 import json
 
 # Configuration
 API_URL = "http://localhost:30002/signup"
 MONGO_URI = "mongodb://localhost:27017"
-DB_NAME = "UserDB"  
+DB_NAME = "UserDB"
 COLLECTION_NAME = "users"
-FILE_PATH = "/home/.evaluationScripts/data.json"
-EVALUATE_FILE = "/home/.evaluationScripts/evaluate.json"
+FILE_PATH = "/home/godfather/MERN_Labs/activity2/.evaluationScripts/data.json"
+EVALUATE_FILE = "/home/godfather/MERN_Labs/activity2/.evaluationScripts/evaluate.json"
 
 # Load test data from JSON file
 with open(FILE_PATH, 'r') as file:
     test_data = json.load(file)
 
+# Adjusted to 5 test cases (removing the last one)
 dataSkel_list = []
-for i in range(1, 7):  # Adjusted to 6 test cases for clarity if needed
+for i in range(1, 6):
     obj = {
         "testid": i,
         "status": "fail",
@@ -69,17 +68,24 @@ def count_users_with_username(username):
     except Exception as e:
         print("An error occurred while counting entries:", e)
         return None
-    
+
 def main():
     # Send signup requests for each test data entry
+    # Test case 1: Missing email (non-empty field check)
     r0 = send_signup_request(test_data[0])
+    # Test case 2: Invalid email format
     r1 = send_signup_request(test_data[1])
+    # Test case 3: Valid registration for a new user (for subsequent login tests)
     r2 = send_signup_request(test_data[2])
+    # Test case 4: Duplicate registration with correct password (simulate login success)
     r3 = send_signup_request(test_data[3])
+    # Test case 5: Duplicate registration with wrong password (simulate login failure)
     r4 = send_signup_request(test_data[4])
-    r5 = send_signup_request(test_data[5])    
+    
+    time.sleep(1)  # Give the database a moment to update
 
-    # Test 1: Check if the first entry (with empty password) was rejected.
+    # --------------------
+    # Test 1: Check that a signup attempt with a missing email is rejected.
     if count_users_with_email(test_data[0]["email"]) == 0:
         dataSkel_list[0] = {
             "testid": 1,
@@ -95,10 +101,11 @@ def main():
             "score": 0,
             "maximum marks": 1,
             "message": "Test case 1 failed"
-        }        
-
-    # Test 2: Check if the second entry (with empty email) was rejected.
-    if count_users_with_username(test_data[1]["username"]) == 0:
+        }
+        
+    # --------------------
+    # Test 2: Check that a signup attempt with an invalid email format is rejected.
+    if count_users_with_email(test_data[1]["email"]) == 0:
         dataSkel_list[1] = {
             "testid": 2,
             "status": "pass",
@@ -114,16 +121,38 @@ def main():
             "maximum marks": 1,
             "message": "Test case 2 failed"
         }
-
-    # Test 3: Check if the third entry (with empty username) was rejected.
-    if count_users_with_email(test_data[2]["email"]) == 0:
-        dataSkel_list[2] = {
-            "testid": 3,
-            "status": "pass",
-            "score": 1,
-            "maximum marks": 1,
-            "message": "Test case 3 passed"
-        }
+        
+    # --------------------
+    # Test 3: Check that a valid new user is stored with a hashed password.
+    if count_users_with_email(test_data[2]["email"]) == 1:
+        user = query_user_in_db(test_data[2]["email"])
+        stored_password = user.get("password", "")
+        try:
+            if bcrypt.checkpw(test_data[2]["password"].encode('utf-8'), stored_password.encode('utf-8')):
+                dataSkel_list[2] = {
+                    "testid": 3,
+                    "status": "pass",
+                    "score": 1,
+                    "maximum marks": 1,
+                    "message": "Test case 3 passed"
+                }
+            else:
+                dataSkel_list[2] = {
+                    "testid": 3,
+                    "status": "fail",
+                    "score": 0,
+                    "maximum marks": 1,
+                    "message": "Test case 3 failed"
+                }
+        except Exception as e:
+            print("Error while checking password hash:", e)
+            dataSkel_list[2] = {
+                "testid": 3,
+                "status": "fail",
+                "score": 0,
+                "maximum marks": 1,
+                "message": "Test case 3 failed"
+            }
     else:
         dataSkel_list[2] = {
             "testid": 3,
@@ -131,10 +160,12 @@ def main():
             "score": 0,
             "maximum marks": 1,
             "message": "Test case 3 failed"
-        }        
-          
-    # Test 4: For the fourth entry, verify that a valid user is stored and password is hashed.
-    if count_users_with_email(test_data[3]["email"]) == 1: 
+        }
+    
+    # --------------------
+    # Test 4: For a duplicate registration with the same credentials (correct password),
+    # simulate a login by checking that the database still contains one entry and that the password matches.
+    if count_users_with_email(test_data[3]["email"]) == 1:
         user = query_user_in_db(test_data[3]["email"])
         stored_password = user.get("password", "")
         try:
@@ -155,7 +186,7 @@ def main():
                     "message": "Test case 4 failed"
                 }
         except Exception as e:
-            print("Error while checking password hash:", e)
+            print("Error while checking duplicate password hash:", e)
             dataSkel_list[3] = {
                 "testid": 4,
                 "status": "fail",
@@ -171,16 +202,39 @@ def main():
             "maximum marks": 1,
             "message": "Test case 4 failed"
         }
-
-    # Test 5: Check if duplicate user creation (fifth entry) for username is handled.
-    if count_users_with_username(test_data[4]["username"]) == 1: 
-        dataSkel_list[4] = {
-            "testid": 5,
-            "status": "pass",
-            "score": 1,
-            "maximum marks": 1,
-            "message": "Test case 5 passed"
-        }
+    
+    # --------------------
+    # Test 5: For a duplicate registration with a wrong password,
+    # the stored hash should not match the provided password (simulate a failed login attempt).
+    if count_users_with_email(test_data[4]["email"]) == 1:
+        user = query_user_in_db(test_data[4]["email"])
+        stored_password = user.get("password", "")
+        try:
+            if not bcrypt.checkpw(test_data[4]["password"].encode('utf-8'), stored_password.encode('utf-8')):
+                dataSkel_list[4] = {
+                    "testid": 5,
+                    "status": "pass",
+                    "score": 1,
+                    "maximum marks": 1,
+                    "message": "Test case 5 passed"
+                }
+            else:
+                dataSkel_list[4] = {
+                    "testid": 5,
+                    "status": "fail",
+                    "score": 0,
+                    "maximum marks": 1,
+                    "message": "Test case 5 failed"
+                }
+        except Exception as e:
+            print("Error while checking wrong password hash:", e)
+            dataSkel_list[4] = {
+                "testid": 5,
+                "status": "fail",
+                "score": 0,
+                "maximum marks": 1,
+                "message": "Test case 5 failed"
+            }
     else:
         dataSkel_list[4] = {
             "testid": 5,
@@ -190,30 +244,12 @@ def main():
             "message": "Test case 5 failed"
         }
 
-    # Test 6: Check if duplicate user creation (sixth entry) for email is handled.
-    if count_users_with_email(test_data[5]["email"]) == 1: 
-        dataSkel_list[5] = {
-            "testid": 6,
-            "status": "pass",
-            "score": 1,
-            "maximum marks": 1,
-            "message": "Test case 6 passed"
-        }
-    else:
-        dataSkel_list[5] = {
-            "testid": 6,
-            "status": "fail",
-            "score": 0,
-            "maximum marks": 1,
-            "message": "Test case 6 failed"
-        }
-
-# Write test results to evaluate.json file
-try:
-    with open(EVALUATE_FILE, 'w') as eval_file:
-        json.dump({"data": dataSkel_list}, eval_file, indent=4)
-except Exception as e:
-    print("An error occurred while writing to evaluate.json:", e)
+    # Write test results to evaluate.json file
+    try:
+        with open(EVALUATE_FILE, 'w') as eval_file:
+            json.dump({"data": dataSkel_list}, eval_file, indent=4)
+    except Exception as e:
+        print("An error occurred while writing to evaluate.json:", e)
 
 if __name__ == "__main__":
     main()

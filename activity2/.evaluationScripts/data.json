@@ -1,32 +1,32 @@
 [
     {
-        "username": "luci fawx",
-        "email": "lucifawx@gmail.com",
-        "password": ""
-    },
-    {
-        "username": "daniels danny",
+        "username": "testuser1",
         "email": "",
-        "password": "daniel@123"
+        "password": "SomePassword1",
+        "role": "user"
     },
     {
-        "username": "",
-        "email": "alina_rani@gmail.com",
-        "password": "alina_Rani@123"
+        "username": "testuser2",
+        "email": "invalid-email-format",
+        "password": "SomePassword2",
+        "role": "user"
     },
     {
-        "username": "Tom Hardy",
-        "email": "tomhardy@gmail.com",
-        "password": "tomhardySecretpassword"
+        "username": "ram kumar sharma",
+        "email": "ram@gmail.com",
+        "password": "ram@123",
+        "role": "user"
     },
     {
-        "username": "Tom Hardy",
-        "email": "tomhardy1@gmail.com",
-        "password": "TomhardysSecret"
+        "username": "ram kumar sharma",
+        "email": "ram@gmail.com",
+        "password": "ram@123",
+        "role": "user"
     },
     {
-        "username": "Thomas Hardy",
-        "email": "tomhardy@gmail.com",
-        "password": "Thomas@123"
+        "username": "ram kumar sharma",
+        "email": "ram@gmail.com",
+        "password": "WrongPassword",
+        "role": "user"
     }
 ]
