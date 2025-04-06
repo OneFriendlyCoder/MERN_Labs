@@ -139,7 +139,7 @@
       })
       .then(result => {
         console.log('Login Success:', result);
-        if (result.message === "Login successful") {
+        if (result.message === "Login successful" && result.message) {
           showToast('Login Successful!');
           setTimeout(() => {
               window.location.href = "flappy.html";}, 10);
