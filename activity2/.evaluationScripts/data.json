@@ -2,31 +2,26 @@
     {
         "username": "testuser1",
         "email": "",
-        "password": "SomePassword1",
-        "role": "user"
+        "password": "SomePassword1"
     },
     {
         "username": "testuser2",
         "email": "invalid-email-format",
-        "password": "SomePassword2",
-        "role": "user"
+        "password": "SomePassword2"
     },
     {
-        "username": "ram kumar sharma",
+        "username": "ram",
         "email": "ram@gmail.com",
-        "password": "ram@123",
-        "role": "user"
+        "password": "ram@123"
     },
     {
-        "username": "ram kumar sharma",
+        "username": "ram",
         "email": "ram@gmail.com",
-        "password": "ram@123",
-        "role": "user"
+        "password": "ram@123"
     },
     {
-        "username": "ram kumar sharma",
+        "username": "ram",
         "email": "ram@gmail.com",
-        "password": "WrongPassword",
-        "role": "user"
+        "password": "WrongPassword"
     }
 ]

@@ -6,7 +6,7 @@ import json
 BASE_URL = "http://localhost:30002"  # Adjust if your server runs on a different port
 LOGIN_ENDPOINT = "/login"
 DASHBOARD_ENDPOINT = "/protected/dashboard"
-EVALUATE_FILE = "/home/godfather/MERN_Labs/activity4/.evaluationScripts/evaluate.json"  # Adjust path if needed
+EVALUATE_FILE = "/home/.evaluationScripts/evaluate.json"  # Adjust path if needed
 
 VALID_EMAIL = "ram@gmail.com"    # Replace with valid test credentials
 VALID_PASSWORD = "ram@123"       # Replace with valid test credentials
@@ -40,7 +40,6 @@ def login_and_get_credentials():
     try:
         response = requests.post(url, json=payload)
         if response.status_code != 200:
-            # print(f"❌ Login failed: Status {response.status_code}")
             return None, None
 
         data = response.json()
@@ -48,13 +47,10 @@ def login_and_get_credentials():
         user = data.get("user")
         # Check for non-empty token, user, username, and email
         if not token or not user or not user.get("username") or not user.get("email"):
-            # print("❌ Login response missing required fields.")
             return None, None
 
-        # print("✅ Login successful. Token and user info received.")
         return token, user
     except Exception as e:
-        # print(f"❌ Exception during login: {e}")
         return None, None
 
 def access_dashboard(token):
@@ -67,13 +63,9 @@ def access_dashboard(token):
     try:
         response = requests.get(url, headers=headers)
         if response.status_code != 200:
-            # print(f"❌ Failed to access dashboard: Status {response.status_code}")
             return None
-        
-        # print("✅ Dashboard accessed successfully.")
         return response.text
     except Exception as e:
-        # print(f"❌ Exception while accessing dashboard: {e}")
         return None
 
 def extract_username_from_html(html):
@@ -91,7 +83,6 @@ def main():
     # ---------- Test Case 1: Login Test ----------
     token, user = login_and_get_credentials()
     if token and user:
-        # Login test passes if token and required user fields are non empty.
         dataSkel_list[0] = {
             "testid": 1,
             "status": "pass",
@@ -105,9 +96,9 @@ def main():
             "status": "fail",
             "score": 0,
             "maximum marks": 1,
-            "message": "Test case 1 failed"
+            "message": "Server not running or login failed"
         }
-        # If login fails, there is no point to check dashboard so we write out the file and exit.
+        # If login fails, there's no point checking the dashboard.
         with open(EVALUATE_FILE, 'w') as eval_file:
             json.dump({"data": dataSkel_list}, eval_file, indent=4)
         return
@@ -123,7 +114,7 @@ def main():
                 "status": "pass",
                 "score": 1,
                 "maximum marks": 1,
-                "message": f"Test case 2 passed"
+                "message": "Test case 2 passed"
             }
         else:
             dataSkel_list[1] = {
@@ -131,7 +122,7 @@ def main():
                 "status": "fail",
                 "score": 0,
                 "maximum marks": 1,
-                "message": f"Test case 2 failed"
+                "message": "Dashboard username does not match login username"
             }
     else:
         dataSkel_list[1] = {
@@ -139,10 +130,9 @@ def main():
             "status": "fail",
             "score": 0,
             "maximum marks": 1,
-            "message": "Test case 2 failed"
+            "message": "Server not running or dashboard not accessible"
         }
 
-    # Write test results to evaluate.json file
     try:
         with open(EVALUATE_FILE, 'w') as eval_file:
             json.dump({"data": dataSkel_list}, eval_file, indent=4)

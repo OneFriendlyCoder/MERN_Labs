@@ -10,8 +10,8 @@ LOGIN_URL = "http://localhost:30002/login"
 MONGO_URI = "mongodb://localhost:27017"
 DB_NAME = "UserDB"
 COLLECTION_NAME = "users"
-FILE_PATH = "/home/godfather/MERN_Labs/activity3/.evaluationScripts/data.json"
-EVALUATE_FILE = "/home/godfather/MERN_Labs/activity3/.evaluationScripts/evaluate.json"
+FILE_PATH = "/home/.evaluationScripts/data.json"
+EVALUATE_FILE = "/home/.evaluationScripts/evaluate.json"
 
 # Load test data from JSON file
 with open(FILE_PATH, 'r') as file:
@@ -93,6 +93,33 @@ def main():
     # Test case 5: Duplicate registration with wrong password (simulate login failure)
     r4 = send_signup_request(test_data[4])
     
+    # Also send login request for test case 6 using valid registration's credentials (from test_data[2])
+    login_data = {
+        "email": test_data[2]["email"],
+        "password": test_data[2]["password"]
+    }
+    r5 = send_login_request(login_data)
+    
+    responses = [r0, r1, r2, r3, r4, r5]
+    
+    # Check if the server is not running (i.e. all responses are None)
+    if all(response is None for response in responses):
+        print("Server is not running or not reachable. Failing all test cases.")
+        for i in range(len(dataSkel_list)):
+            dataSkel_list[i] = {
+                "testid": i + 1,
+                "status": "fail",
+                "score": 0,
+                "maximum marks": 1,
+                "message": "Server not running or not reachable."
+            }
+        try:
+            with open(EVALUATE_FILE, 'w') as eval_file:
+                json.dump({"data": dataSkel_list}, eval_file, indent=4)
+        except Exception as e:
+            print("An error occurred while writing to evaluate.json:", e)
+        return
+
     time.sleep(1)  # Give the database a moment to update
 
     # --------------------
@@ -258,12 +285,7 @@ def main():
     # --------------------
     # Test 6: Check for a proper JWT response from the /login endpoint.
     # Use the valid registration's credentials (from test_data[2]).
-    login_data = {
-        "email": test_data[2]["email"],
-        "password": test_data[2]["password"]
-    }
-    login_response = send_login_request(login_data)
-    if login_response is None:
+    if r5 is None:
         dataSkel_list[5] = {
             "testid": 6,
             "status": "fail",
@@ -273,8 +295,7 @@ def main():
         }
     else:
         try:
-            login_result = login_response.json()
-            # print(login_result)
+            login_result = r5.json()
             # Check that login_result has token, message and user (with correct username and email)
             if (login_result.get("token") and login_result.get("message") and login_result.get("user") and
                 login_result["user"].get("username") == test_data[2]["username"] and
@@ -308,6 +329,7 @@ def main():
     try:
         with open(EVALUATE_FILE, 'w') as eval_file:
             json.dump({"data": dataSkel_list}, eval_file, indent=4)
+        print("Evaluation results written to evaluate.json")
     except Exception as e:
         print("An error occurred while writing to evaluate.json:", e)
 

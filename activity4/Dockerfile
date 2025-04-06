@@ -29,7 +29,7 @@ RUN apt-get update -y && apt-get install -y \
 
 # Upgrade pip and install pymongo and faker
 RUN python3 -m pip install --upgrade pip setuptools wheel && \
-    python3 -m pip install pymongo faker
+    python3 -m pip install pymongo faker requests bcrypt
 
 # Install Node.js (version 16, which is above version 14)
 RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash - && \

@@ -9,8 +9,8 @@ API_URL = "http://localhost:30002/signup"
 MONGO_URI = "mongodb://localhost:27017"
 DB_NAME = "UserDB"
 COLLECTION_NAME = "users"
-FILE_PATH = "/home/godfather/MERN_Labs/activity1/.evaluationScripts/data.json"
-EVALUATE_FILE = "/home/godfather/MERN_Labs/activity1/.evaluationScripts/evaluate.json"
+FILE_PATH = "/home/.evaluationScripts/data.json"
+EVALUATE_FILE = "/home/.evaluationScripts/evaluate.json"
 
 # Load test data from JSON file
 with open(FILE_PATH, 'r') as file:
@@ -75,6 +75,24 @@ def main():
     for entry in test_data:
         responses.append(send_signup_request(entry))
     
+    # If all signup requests failed (server not reachable), fail all tests.
+    if all(r is None for r in responses):
+        print("Server is not running or not reachable. Failing all test cases.")
+        for i in range(len(dataSkel_list)):
+            dataSkel_list[i] = {
+                "testid": i + 1,
+                "status": "fail",
+                "score": 0,
+                "maximum marks": 1,
+                "message": "Server not running or not reachable."
+            }
+        try:
+            with open(EVALUATE_FILE, 'w') as eval_file:
+                json.dump({"data": dataSkel_list}, eval_file, indent=4)
+        except Exception as e:
+            print("An error occurred while writing to evaluate.json:", e)
+        return
+
     # Wait for a short period to ensure all signup operations complete
     time.sleep(2)
     

@@ -9,8 +9,8 @@ API_URL = "http://localhost:30002/signup"
 MONGO_URI = "mongodb://localhost:27017"
 DB_NAME = "UserDB"
 COLLECTION_NAME = "users"
-FILE_PATH = "/home/godfather/MERN_Labs/activity2/.evaluationScripts/data.json"
-EVALUATE_FILE = "/home/godfather/MERN_Labs/activity2/.evaluationScripts/evaluate.json"
+FILE_PATH = "/home/.evaluationScripts/data.json"
+EVALUATE_FILE = "/home/.evaluationScripts/evaluate.json"
 
 # Load test data from JSON file
 with open(FILE_PATH, 'r') as file:
@@ -71,21 +71,37 @@ def count_users_with_username(username):
 
 def main():
     # Send signup requests for each test data entry
-    # Test case 1: Missing email (non-empty field check)
-    r0 = send_signup_request(test_data[0])
-    # Test case 2: Invalid email format
-    r1 = send_signup_request(test_data[1])
-    # Test case 3: Valid registration for a new user (for subsequent login tests)
-    r2 = send_signup_request(test_data[2])
-    # Test case 4: Duplicate registration with correct password (simulate login success)
-    r3 = send_signup_request(test_data[3])
-    # Test case 5: Duplicate registration with wrong password (simulate login failure)
-    r4 = send_signup_request(test_data[4])
+    r0 = send_signup_request(test_data[0])  # Test case 1: Missing email (empty email field)
+    r1 = send_signup_request(test_data[1])  # Test case 2: Invalid email format
+    r2 = send_signup_request(test_data[2])  # Test case 3: Valid registration for a new user
+    r3 = send_signup_request(test_data[3])  # Test case 4: Duplicate registration with same credentials (correct password)
+    r4 = send_signup_request(test_data[4])  # Test case 5: Duplicate registration with wrong password
+
+    responses = [r0, r1, r2, r3, r4]
     
+    # Check if the server is not running (i.e. all responses are None)
+    if all(response is None for response in responses):
+        print("Server is not running or not reachable. Failing all test cases.")
+        for i in range(len(dataSkel_list)):
+            dataSkel_list[i] = {
+                "testid": i + 1,
+                "status": "fail",
+                "score": 0,
+                "maximum marks": 1,
+                "message": "Server not running or not reachable."
+            }
+        try:
+            with open(EVALUATE_FILE, 'w') as eval_file:
+                json.dump({"data": dataSkel_list}, eval_file, indent=4)
+        except Exception as e:
+            print("An error occurred while writing to evaluate.json:", e)
+        return
+
     time.sleep(1)  # Give the database a moment to update
 
     # --------------------
     # Test 1: Check that a signup attempt with a missing email is rejected.
+    # (Expect no DB entry for test_data[0])
     if count_users_with_email(test_data[0]["email"]) == 0:
         dataSkel_list[0] = {
             "testid": 1,
@@ -248,6 +264,7 @@ def main():
     try:
         with open(EVALUATE_FILE, 'w') as eval_file:
             json.dump({"data": dataSkel_list}, eval_file, indent=4)
+        print("Evaluation results written to evaluate.json")
     except Exception as e:
         print("An error occurred while writing to evaluate.json:", e)
 
